@@ -1,0 +1,14 @@
+*.pyc
+__pycache__
+venv
+db.sqlite3
+.DS_Store
+.idea
+settings.py
+media/
+static/
+deploy.py
+others/
+config_django.py
+log.txt
+*.log
