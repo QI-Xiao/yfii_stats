@@ -4,5 +4,5 @@ from . import views
 
 
 urlpatterns = [
-    path('roi_week', views.roi_week),
+    path('', views.stats_api),
 ]
