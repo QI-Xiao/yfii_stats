@@ -69,6 +69,9 @@ def getBalance(contract, tokenInfo):
 # 获取法币报价
 def fetchTokenPrice(data):
     tokens = [(item.get('id') or item['name']).lower() for item in data]
+    yfii_id = 'yfii-finance'
+    tokens.append(yfii_id)
+    # print('token', tokens)
     try:
         res = requests.get('https://api.coingecko.com/api/v3/simple/price?ids=%s&vs_currencies=usd' % ','.join(tokens))
         res_json = res.json()
@@ -94,7 +97,12 @@ def fetchTokenPrice(data):
         dic_one.update(item)
         lst_all.append(dic_one)
 
-    return lst_all
+    try:
+        yfii_price = res_json[yfii_id]['usd']
+    except:
+        yfii_price = 0
+
+    return lst_all, yfii_price
 
 
 def toFixed(num, fixed=None):
@@ -109,7 +117,7 @@ def getVaultsConfig():
 #  初始化合约
 def initContract(item):
     # w3 = Web3('https://mainnet.infura.io/v3/30636a84ebb34a1f8d0966c88134ade3')
-    print('w3.isConnected()', w3, w3.isConnected())
+    # print('w3.isConnected()', w3, w3.isConnected())
     tokenContract = w3.eth.contract(abi=erc20Abi, address=item['token'])
     vaultContract = w3.eth.contract(abi=vaultAbi, address=item['vault'])
     strategyContract = None
@@ -180,7 +188,7 @@ def getStrategyAPY(lst):
 # 合并机枪池配置至本地配置
 def getVaultsList():
     config = getVaultsConfig()
-    print(config)
+    # print(config)
     commonBack = []
     for item in config:
         init_con = initContract(item)
@@ -220,7 +228,7 @@ def getVaultsList():
         commonBack.append(oneBack)
 
     # print('commonBack', commonBack)
-    priceBackData = fetchTokenPrice(commonBack)
+    priceBackData, yfii_price = fetchTokenPrice(commonBack)
     # print('priceBackData:', priceBackData)
     apyBackData = getStrategyAPY(priceBackData)
     # print('apyBackData:', apyBackData)
@@ -229,10 +237,12 @@ def getVaultsList():
 
     print(172, oldPoolData)
 
+    pool_tvl = getPoolsVolume(yfii_price)
+    created_time = datetime.datetime.now()
     # with open('test_data.json', 'w') as f:
     #     f.write(json.dumps(oldPoolData))
 
-    return json.dumps(oldPoolData)
+    return json.dumps({'data': oldPoolData, 'tvl': pool_tvl, 'created_time': str(created_time)})
 
 
 # 一池和二池
@@ -272,6 +282,34 @@ def getOldPoolData():
         'yfiiAPY': toFixed(data_1['yearlyROI'], 4)
     }]
     return oldPoolData
+
+
+# 单个池子的抵押量和tvl
+def getPoolVol(contract, address, price):
+    decimals = 10 ** 18
+    balance = contract.functions.balanceOf(address).call()
+    volume = balance / decimals
+    tvl = volume * price
+    return {'address': address, 'volume': volume, 'tvl': tvl}
+
+
+# 三个池子的总量
+def getPoolsVolume(price):
+    yfii = '0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83'
+    contract = w3.eth.contract(abi=erc20Abi, address=yfii)
+
+    address_lst = [
+        '0xb81D3cB2708530ea990a287142b82D058725C092',
+        '0xAFfcD3D45cEF58B1DfA773463824c6F6bB0Dc13a',
+        '0xf1750B770485A5d0589A6ba1270D9FC354884D45',
+    ]
+
+    pool_lst = []
+    for address in address_lst:
+        vol = getPoolVol(contract, address, price)
+        pool_lst.append(vol)
+
+    return pool_lst
 
 
 db = peewee.MySQLDatabase(**mysql_kwargs)
