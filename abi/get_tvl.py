@@ -232,21 +232,20 @@ def getVaultsList():
     # print('priceBackData:', priceBackData)
     apyBackData = getStrategyAPY(priceBackData)
     # print('apyBackData:', apyBackData)
-    oldPoolData = getOldPoolData()
+    oldPoolData = getOldPoolData(yfii_price)
     oldPoolData.extend(apyBackData)
 
     print(172, oldPoolData)
 
-    pool_tvl = getPoolsVolume(yfii_price)
-    created_time = datetime.datetime.now()
+    created_time = datetime.datetime.now() + datetime.timedelta(hours=8)
     # with open('test_data.json', 'w') as f:
     #     f.write(json.dumps(oldPoolData))
 
-    return json.dumps({'data': oldPoolData, 'tvl': pool_tvl, 'created_time': str(created_time)})
+    return json.dumps({'data': oldPoolData, 'created_time': str(created_time)})
 
 
 # 一池和二池
-def getOldPoolData():
+def getOldPoolData(yfii_price):
     res = requests.get('https://api.coinmarketcap.com/data-api/v1/farming/yield/latest').json()
     farmingProjects = res['data']['farmingProjects']
     for oldPoolIndex, fi in enumerate(farmingProjects):
@@ -254,6 +253,8 @@ def getOldPoolData():
             break
     else:
         oldPoolIndex = -1
+
+    # print('oldPoolIndex', oldPoolIndex)
     oldPoolAllData = farmingProjects[oldPoolIndex]['poolList']
     data_0 = oldPoolAllData[0]
     data_1 = oldPoolAllData[1]
@@ -280,36 +281,52 @@ def getOldPoolData():
         'vault': "0xAFfcD3D45cEF58B1DfA773463824c6F6bB0Dc13a",
         'yfiiWeeklyROI': toFixed(data_1['weeklyROI'], 4),
         'yfiiAPY': toFixed(data_1['yearlyROI'], 4)
+    },
+    {
+        'Strategy': "0xf1750B770485A5d0589A6ba1270D9FC354884D45",
+        'assetName': 'YFII',
+        # 'balancePrice': data_1['totalStake'],
+        # 'id': data_1['id'],
+        'name': 'YFII',
+        # 'strategyName': data_1['name'],
+        'token': "0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83",
+        'yfiiWeeklyROI': 0,
+        'yfiiAPY': 0,
+        'yfii_price': yfii_price,
     }]
+
+    for pool in oldPoolData:
+        getPoolVol(pool)
+
     return oldPoolData
 
 
 # 单个池子的抵押量和tvl
-def getPoolVol(contract, address, price):
+def getPoolVol(pool):
+    strategy = pool['Strategy']
     decimals = 10 ** 18
-    balance = contract.functions.balanceOf(address).call()
+    contract = w3.eth.contract(abi=erc20Abi, address=pool['token'])
+    balance = contract.functions.balanceOf(strategy).call()
     volume = balance / decimals
-    tvl = volume * price
-    return {'address': address, 'volume': volume, 'tvl': tvl}
+    pool['volume'] = volume
+    if strategy == "0xf1750B770485A5d0589A6ba1270D9FC354884D45":  # pool 3
+        pool["balancePrice"] = volume * pool['yfii_price']
 
 
-# 三个池子的总量
-def getPoolsVolume(price):
-    yfii = '0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83'
-    contract = w3.eth.contract(abi=erc20Abi, address=yfii)
-
-    address_lst = [
-        '0xb81D3cB2708530ea990a287142b82D058725C092',
-        '0xAFfcD3D45cEF58B1DfA773463824c6F6bB0Dc13a',
-        '0xf1750B770485A5d0589A6ba1270D9FC354884D45',
-    ]
-
-    pool_lst = []
-    for address in address_lst:
-        vol = getPoolVol(contract, address, price)
-        pool_lst.append(vol)
-
-    return pool_lst
+# # 三个池子的总量
+# def getPoolsVolume(price):
+#     address_lst = [
+#         ('pool1', 'ycrv', '0xdF5e0e81Dff6FAF3A7e52BA697820c5e32D806A8', '0xb81D3cB2708530ea990a287142b82D058725C092'),
+#         ('pool2', 'BPT', '0x16cAC1403377978644e78769Daa49d8f6B6CF565', '0xAFfcD3D45cEF58B1DfA773463824c6F6bB0Dc13a'),
+#         ('pool3', 'yfii', '0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83', '0xf1750B770485A5d0589A6ba1270D9FC354884D45'),
+#     ]
+#
+#     pool_lst = {}
+#     for address in address_lst:
+#         vol = getPoolVol(address[1], address[2], address[3], price)
+#         pool_lst[address[0]] = vol
+#
+#     return pool_lst
 
 
 db = peewee.MySQLDatabase(**mysql_kwargs)
@@ -329,7 +346,7 @@ if __name__ == '__main__':
     db.connect()
 
     item = Abi_tokenjson.create(
-        text=text_json, created_time=datetime.datetime.now()
+        text=text_json, created_time=datetime.datetime.now() + datetime.timedelta(hours=8)
     )
     item.save()
     db.close()

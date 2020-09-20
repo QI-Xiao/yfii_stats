@@ -4,5 +4,6 @@ from . import views
 
 
 urlpatterns = [
-    path('', views.stats_api),
+    path('stats/api/', views.stats_api),
+    path('pool3/apy/', views.pool3_apy),
 ]

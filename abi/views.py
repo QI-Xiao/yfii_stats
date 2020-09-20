@@ -17,3 +17,9 @@ def stats_api(request):
 
     return response
     # return HttpResponse(last_one.text)
+
+
+def pool3_apy(request):
+    response = JsonResponse({'apy': 0})
+    response["Access-Control-Allow-Origin"] = "*"
+    return response
