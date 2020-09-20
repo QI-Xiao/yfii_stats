@@ -9,4 +9,11 @@ import json
 def stats_api(request):
     last_one = TokenJson.objects.all().last()
 
-    return HttpResponse(last_one.text)
+    response = HttpResponse(last_one.text)
+    response["Access-Control-Allow-Origin"] = "*"
+    # response["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+    # response["Access-Control-Max-Age"] = "1000"
+    # response["Access-Control-Allow-Headers"] = "X-Requested-With, Content-Type"
+
+    return response
+    # return HttpResponse(last_one.text)
