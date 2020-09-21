@@ -238,11 +238,16 @@ def getVaultsList():
     for pool in oldPoolData:
         tvl.append({
             'name': pool['name'],
-            'staked tvl pay': pool['balancePrice'],
-            'yfiiWeeklyROI': pool['yfiiWeeklyROI'],
-            'yfiiAPY': pool['yfiiAPY'],
-            'volume': pool['volume'],
+            'tvl': pool['balancePrice'],
+            'pay': pool['yfiiAPY'],
+            'staked': pool['volume'],
         })
+    tvl.append({
+        'name': 'yfii',
+        'tvl': 0,
+        'pay': 0,
+        'staked': 0,
+    })
 
     oldPoolData.extend(apyBackData)
 
@@ -276,7 +281,7 @@ def getOldPoolData(yfii_price):
         'assetName': data_0['name'],
         'balancePrice': data_0['totalStake'],
         'id': data_0['id'],
-        'name': data_0['pair'],
+        'name': 'yearn.finance',
         'strategyName': data_0['name'],
         'token': "0xdF5e0e81Dff6FAF3A7e52BA697820c5e32D806A8",
         'vault': "0xb81D3cB2708530ea990a287142b82D058725C092",
@@ -288,7 +293,7 @@ def getOldPoolData(yfii_price):
         'assetName': data_1['name'],
         'balancePrice': data_1['totalStake'],
         'id': data_1['id'],
-        'name': data_1['pair'],
+        'name': 'Balancer Pool',
         'strategyName': data_1['name'],
         'token': "0x16cAC1403377978644e78769Daa49d8f6B6CF565",
         'vault': "0xAFfcD3D45cEF58B1DfA773463824c6F6bB0Dc13a",
@@ -300,7 +305,7 @@ def getOldPoolData(yfii_price):
         'assetName': 'YFII',
         # 'balancePrice': data_1['totalStake'],
         # 'id': data_1['id'],
-        'name': 'YFII',
+        'name': 'Governance',
         # 'strategyName': data_1['name'],
         'token': "0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83",
         'yfiiWeeklyROI': 0,
