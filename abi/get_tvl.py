@@ -238,7 +238,7 @@ def getVaultsList():
     for pool in oldPoolData:
         tvl.append({
             'name': pool['name'],
-            'balancePrice': pool['balancePrice'],
+            'staked tvl pay': pool['balancePrice'],
             'yfiiWeeklyROI': pool['yfiiWeeklyROI'],
             'yfiiAPY': pool['yfiiAPY'],
             'volume': pool['volume'],
