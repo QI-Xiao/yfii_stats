@@ -233,6 +233,17 @@ def getVaultsList():
     apyBackData = getStrategyAPY(priceBackData)
     # print('apyBackData:', apyBackData)
     oldPoolData = getOldPoolData(yfii_price)
+
+    tvl = []
+    for pool in oldPoolData:
+        tvl.append({
+            'name': pool['name'],
+            'balancePrice': pool['balancePrice'],
+            'yfiiWeeklyROI': pool['yfiiWeeklyROI'],
+            'yfiiAPY': pool['yfiiAPY'],
+            'volume': pool['volume'],
+        })
+
     oldPoolData.extend(apyBackData)
 
     print(172, oldPoolData)
@@ -241,7 +252,9 @@ def getVaultsList():
     # with open('test_data.json', 'w') as f:
     #     f.write(json.dumps(oldPoolData))
 
-    return json.dumps({'data': oldPoolData, 'created_time': str(created_time)})
+    text_vault = json.dumps({'data': oldPoolData, 'created_time': str(created_time)})
+    text_3pool = json.dumps({'data': tvl, 'created_time': str(created_time)})
+    return text_vault, text_3pool
 
 
 # 一池和二池
@@ -334,6 +347,7 @@ db = peewee.MySQLDatabase(**mysql_kwargs)
 
 class Abi_tokenjson(peewee.Model):
     text = peewee.TextField(verbose_name='文本')
+    text_3pool = peewee.TextField(verbose_name='文本_3pool')
     created_time = peewee.DateTimeField(verbose_name='创建时间')
 
     class Meta:
@@ -341,12 +355,14 @@ class Abi_tokenjson(peewee.Model):
 
 
 if __name__ == '__main__':
-    text_json = getVaultsList()
+    text_vault, text_3pool = getVaultsList()
 
     db.connect()
 
     item = Abi_tokenjson.create(
-        text=text_json, created_time=datetime.datetime.now() + datetime.timedelta(hours=8)
+        text=text_vault,
+        text_3pool=text_3pool,
+        created_time=datetime.datetime.now() + datetime.timedelta(hours=8)
     )
     item.save()
     db.close()

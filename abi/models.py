@@ -14,4 +14,5 @@ from django.db import models
 
 class TokenJson(models.Model):
     text = models.TextField('文本')
+    text_3pool = models.TextField('文本_3pool')
     created_time = models.DateTimeField('创建时间', auto_now_add=True)
