@@ -239,13 +239,13 @@ def getVaultsList():
         tvl.append({
             'name': pool['name'],
             'tvl': pool['balancePrice'],
-            'pay': pool['yfiiAPY'],
+            'apy': pool['yfiiAPY'],
             'staked': pool['volume'],
         })
     tvl.append({
         'name': 'yfii',
         'tvl': 0,
-        'pay': 0,
+        'apy': 0,
         'staked': 0,
     })
 
