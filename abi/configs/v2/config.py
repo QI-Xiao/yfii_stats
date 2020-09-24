@@ -5,6 +5,7 @@ data = [
         "Strategy1": "",
         "vault": "0x72Cf258c852Dc485a853370171d46B9D29fD3184",
         "name": "usdt",
+        'id': 'tether',
         "StrategyName": "dforce"
     },
     {
@@ -12,6 +13,7 @@ data = [
         "Strategy": "0x898828957133d4c50030a5A2D55Ca370915E6A77",
         "vault": "0x3E3db9cc5b540d2794DB3861BE5A4887cF77E48B",
         "name": "ycrv",
+        'id': 'curve-fi-ydai-yusdc-yusdt-ytusd',
         "StrategyName": "crv"
     },
     {
@@ -19,6 +21,7 @@ data = [
         "Strategy": "0xbDD4a57c5EE8558370bb661d29a979657D81258e",
         "vault": "0x1e0DC67aEa5aA74718822590294230162B5f2064",
         "name": "dai",
+        'id': 'dai',
         "StrategyName": "dforce"
     },
     {
@@ -26,6 +29,7 @@ data = [
         "Strategy": "0x30aE128ebCdec11F62cB3fa9C6a0E8269a9AF686",
         "vault": "0x4243f5C8683089b65a9F588B1AE578d5D84bFBC9",
         "name": "tusd",
+        'id': 'true-usd',
         "StrategyName": "crv"
     },
     {
@@ -33,6 +37,7 @@ data = [
         "Strategy": "0x17D5C3FFe2A7c7a1E4567c7501d166B0532C8826",
         "vault": "0x23B4dB3a435517fd5f2661a9c5a16f78311201c1",
         "name": "usdc",
+        'id': 'usd-coin',
         "StrategyName": "for"
     },
     {
@@ -40,6 +45,7 @@ data = [
         "Strategy": "0x0c3E69eF29cbD32e0732409B748ef317a5F4f0a5",
         "vault": "0xa8EA49a9e242fFfBdECc4583551c3BcB111456E6",
         "name": "eth",
+        'id': 'ethereum',
         "StrategyName": "for"
     }
 ]

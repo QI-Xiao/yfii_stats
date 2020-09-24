@@ -16,33 +16,33 @@ from configs.config_django import mysql_kwargs
 
 # 自定义机枪池配置
 # id 获取法币报价字段名
-vaults = [
-  {
-    'name': 'usdt',
-    id: 'tether',
-  },
-  {
-    "name": 'ycrv',
-    id: 'curve-fi-ydai-yusdc-yusdt-ytusd',
-    "curveName": 'y',
-  },
-  {
-    "name": 'dai',
-    id: 'dai',
-  },
-  {
-    "name": 'tusd',
-    id: 'true-usd',
-  },
-  {
-    "name": 'usdc',
-    id: 'usd-coin',
-  },
-  {
-    'name': 'eth',
-    id: 'ethereum',
-  }
-]
+# vaults = [
+#   {
+#     'name': 'usdt',
+#     'id': 'tether',
+#   },
+#   {
+#     "name": 'ycrv',
+#     'id': 'curve-fi-ydai-yusdc-yusdt-ytusd',
+#     "curveName": 'y',
+#   },
+#   {
+#     "name": 'dai',
+#     'id': 'dai',
+#   },
+#   {
+#     "name": 'tusd',
+#     'id': 'true-usd',
+#   },
+#   {
+#     "name": 'usdc',
+#     'id': 'usd-coin',
+#   },
+#   {
+#     'name': 'eth',
+#     'id': 'ethereum',
+#   }
+# ]
 
 
 # // 获取名称方法
@@ -83,12 +83,12 @@ def fetchTokenPrice(data):
     for item in data:
         name = item.get('name')
         balance = item.get('balance')
-        id = (item.get('id') or name).lower()
+        id_coin = (item.get('id') or name).lower()
         usd = 0
         balancePrice = '0'
         try:
-            usd = res_json[id]['usd'] or 0
-            balancePrice = toFixed(balance * usd, 2)
+            usd = res_json[id_coin]['usd'] or 0
+            balancePrice = toFixed(float(balance) * usd, 2)
         except Exception as e:
             print(192, e)
         dic_one = {
@@ -212,21 +212,20 @@ def getVaultsList():
             strategyName = getStrategyName(strategyContract)
         # print('strategyName', strategyName)
 
-        for index, fi in enumerate(vaults):
-            if fi['name'] == item['name']:
-                break
-        else:
-            index = -1
+        # for index, fi in enumerate(vaults):
+        #     if fi['name'] == item['name']:
+        #         break
+        # else:
+        #     index = -1
         # vaultsData = vaults[index] if index > -1 else {}
+        # print('vaultsData', vaultsData)
 
         oneBack = {
             'assetName': assetName,
             'strategyName': strategyName,
             'balance': balance,
         }
-        # print('item, vaultsData', item, vaultsData)
         oneBack.update(item)
-        # oneBack.update(vaultsData)
 
         commonBack.append(oneBack)
 
