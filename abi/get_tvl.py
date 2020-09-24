@@ -84,7 +84,8 @@ def fetchTokenPrice(data):
         name = item.get('name')
         balance = item.get('balance')
         id = (item.get('id') or name).lower()
-        usd = balancePrice = 0
+        usd = 0
+        balancePrice = '0'
         try:
             usd = res_json[id]['usd'] or 0
             balancePrice = toFixed(balance * usd, 2)
@@ -106,7 +107,7 @@ def fetchTokenPrice(data):
 
 
 def toFixed(num, fixed=None):
-    return round(num, fixed)
+    return str(round(num, fixed))
 
 
 #  获取配置文件
@@ -121,8 +122,8 @@ def initContract(item):
     tokenContract = w3.eth.contract(abi=erc20Abi, address=item['token'])
     vaultContract = w3.eth.contract(abi=vaultAbi, address=item['vault'])
     strategyContract = None
-    if item.get('strategy'):
-        strategyContract = w3.eth.contract(abi=strategyAbi, address=item['strategy'])
+    if item.get('Strategy'):
+        strategyContract = w3.eth.contract(abi=strategyAbi, address=item['Strategy'])
     return tokenContract, vaultContract, strategyContract
 
 
@@ -178,7 +179,7 @@ def getStrategyAPY(lst):
         name = item['name']
         yfiiAPY = res[name]
         one_dic = {
-            'yfiiAPY': yfiiAPY  # toFixed(yfiiAPY, 4),
+            'yfiiAPY': yfiiAPY.rstrip('%')
         }
         one_dic.update(item)
         apyBackList.append(one_dic)
@@ -195,10 +196,11 @@ def getVaultsList():
         print('initContract(config[0])', init_con)
         #  初始化合约
         tokenContract, vaultContract, strategyContract = init_con
+        # print('tokenContract, vaultContract, strategyContract', tokenContract, vaultContract, strategyContract)
         #  获取币种信息
         tokenInfo = getTokenInfo(tokenContract, item)
         #  获取池子名称
-        assetName = (getAssetName(vaultContract)) or item['assetName']
+        assetName = getAssetName(vaultContract) or item.get('assetName', '')
         print('tokenInfo', tokenInfo, '\nassetName', assetName)
         #  获取池子余额
         balance = getBalance(vaultContract, tokenInfo)
@@ -206,8 +208,9 @@ def getVaultsList():
         #  获取策略名称
         strategyName = ''
         strategyBalance = 0
-        if item.get('strategy'):
+        if item.get('Strategy'):
             strategyName = getStrategyName(strategyContract)
+        # print('strategyName', strategyName)
 
         for index, fi in enumerate(vaults):
             if fi['name'] == item['name']:
@@ -238,8 +241,8 @@ def getVaultsList():
     for pool in oldPoolData:
         tvl.append({
             'name': pool['name'],
-            'tvl': pool['balancePrice'],
-            'apy': pool['yfiiAPY'],
+            'tvl': float(pool['balancePrice']),
+            'apy': float(pool['yfiiAPY']),
             'staked': pool['volume'],
         })
     tvl.append({
@@ -279,7 +282,7 @@ def getOldPoolData(yfii_price):
     oldPoolData = [{
         'Strategy': "0xb81D3cB2708530ea990a287142b82D058725C092",
         'assetName': data_0['name'],
-        'balancePrice': data_0['totalStake'],
+        'balancePrice': toFixed(data_0['totalStake'], 2),
         'id': data_0['id'],
         'name': 'yearn.finance',
         'strategyName': data_0['name'],
@@ -291,7 +294,7 @@ def getOldPoolData(yfii_price):
     {
         'Strategy': "0xAFfcD3D45cEF58B1DfA773463824c6F6bB0Dc13a",
         'assetName': data_1['name'],
-        'balancePrice': data_1['totalStake'],
+        'balancePrice': toFixed(data_1['totalStake'], 2),
         'id': data_1['id'],
         'name': 'Balancer Pool',
         'strategyName': data_1['name'],
@@ -303,13 +306,13 @@ def getOldPoolData(yfii_price):
     {
         'Strategy': "0xf1750B770485A5d0589A6ba1270D9FC354884D45",
         'assetName': 'YFII',
-        # 'balancePrice': data_1['totalStake'],
+        # 'balancePrice': toFixed(data_1['totalStake'], 2),
         # 'id': data_1['id'],
         'name': 'Governance',
         # 'strategyName': data_1['name'],
         'token': "0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83",
-        'yfiiWeeklyROI': 0,
-        'yfiiAPY': 0,
+        'yfiiWeeklyROI': '0',
+        'yfiiAPY': '0',
         'yfii_price': yfii_price,
     }]
 
@@ -328,7 +331,7 @@ def getPoolVol(pool):
     volume = balance / decimals
     pool['volume'] = volume
     if strategy == "0xf1750B770485A5d0589A6ba1270D9FC354884D45":  # pool 3
-        pool["balancePrice"] = volume * pool['yfii_price']
+        pool["balancePrice"] = toFixed(volume * pool['yfii_price'], 2)
 
 
 # # 三个池子的总量
