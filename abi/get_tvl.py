@@ -286,7 +286,7 @@ def getOldPoolData(yfii_price):
             'yfiiWeeklyROI': toFixed(data_0['weeklyROI'], 4),
             'yfiiAPY': toFixed(data_0['yearlyROI'], 4),
             'source': 'eth',
-            'sourceUrl': 'https://dfi.money/',
+            'sourceUrl': 'https://yfii.finance/',
         },
         {
             'Strategy': "0xAFfcD3D45cEF58B1DfA773463824c6F6bB0Dc13a",
@@ -300,7 +300,7 @@ def getOldPoolData(yfii_price):
             'yfiiWeeklyROI': toFixed(data_1['weeklyROI'], 4),
             'yfiiAPY': toFixed(data_1['yearlyROI'], 4),
             'source': 'eth',
-            'sourceUrl': 'https://dfi.money/',
+            'sourceUrl': 'https://yfii.finance/',
         },
         {
             'Strategy': "0xf1750B770485A5d0589A6ba1270D9FC354884D45",
@@ -314,7 +314,7 @@ def getOldPoolData(yfii_price):
             'yfiiAPY': '0',
             'yfii_price': yfii_price,
             'source': 'eth',
-            'sourceUrl': 'https://dfi.money/',
+            'sourceUrl': 'https://yfii.finance/',
         },
         {
             'Strategy': "0x3d367c9529f260b0661e1c1e91167c9319ee96ca",
