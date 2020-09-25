@@ -7,7 +7,8 @@ dataeth = [
         "name": "usdt",
         'id': 'tether',
         "StrategyName": "dforce",
-        'source': 'eth'
+        'source': 'eth',
+        'sourceUrl': 'https://dfi.money/',
     },
     {
         "token": "0xdF5e0e81Dff6FAF3A7e52BA697820c5e32D806A8",
@@ -16,7 +17,8 @@ dataeth = [
         "name": "ycrv",
         'id': 'curve-fi-ydai-yusdc-yusdt-ytusd',
         "StrategyName": "crv",
-        'source': 'eth'
+        'source': 'eth',
+        'sourceUrl': 'https://dfi.money/',
     },
     {
         "token": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
@@ -25,7 +27,8 @@ dataeth = [
         "name": "dai",
         'id': 'dai',
         "StrategyName": "dforce",
-        'source': 'eth'
+        'source': 'eth',
+        'sourceUrl': 'https://dfi.money/',
     },
     {
         "token": "0x0000000000085d4780B73119b644AE5ecd22b376",
@@ -34,7 +37,8 @@ dataeth = [
         "name": "tusd",
         'id': 'true-usd',
         "StrategyName": "crv",
-        'source': 'eth'
+        'source': 'eth',
+        'sourceUrl': 'https://dfi.money/',
     },
     {
         "token": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
@@ -43,7 +47,8 @@ dataeth = [
         "name": "usdc",
         'id': 'usd-coin',
         "StrategyName": "for",
-        'source': 'eth'
+        'source': 'eth',
+        'sourceUrl': 'https://dfi.money/',
     },
     {
         "token": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
@@ -52,7 +57,8 @@ dataeth = [
         "name": "eth",
         'id': 'ethereum',
         "StrategyName": "for",
-        'source': 'eth'
+        'source': 'eth',
+        'sourceUrl': 'https://dfi.money/',
     },
     {
         "token": "0x4Fabb145d64652a948d72533023f6E7A623C7C53",
@@ -61,7 +67,8 @@ dataeth = [
         "name": "busd",
         'id': 'binance-usd',
         "StrategyName": "for",
-        'source': 'eth'
+        'source': 'eth',
+        'sourceUrl': 'https://dfi.money/',
     },
     {
         "token": "0x0316EB71485b0Ab14103307bf65a021042c6d380",
@@ -70,7 +77,8 @@ dataeth = [
         "name": "hbtc",
         'id': 'bitcoin',
         "StrategyName": "for",
-        'source': 'eth'
+        'source': 'eth',
+        'sourceUrl': 'https://dfi.money/',
     }
 ]
 
@@ -82,7 +90,8 @@ databsc = [
         "name":"usdt",
         'id': 'tether',
         "StrategyName":"",
-        'source': 'bsc'
+        'source': 'bsc',
+        'sourceUrl': 'https://bsc.dfi.money/',
     },
     {
         "token": "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56",
@@ -91,6 +100,7 @@ databsc = [
         "name":"busd",
         'id': 'binance-usd',
         "StrategyName":"",
-        'source': 'bsc'
+        'source': 'bsc',
+        'sourceUrl': 'https://bsc.dfi.money/',
     }
 ]
