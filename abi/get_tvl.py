@@ -3,14 +3,15 @@ import datetime
 
 import peewee
 import requests
-# from web3 import Web3, EthereumTesterProvider
+from web3 import Web3, HTTPProvider
 from web3.auto.infura import w3
 
+from pool4 import getDATA
 from abi_json.ERC20 import erc20Abi
 from abi_json.v2.vault import vaultAbi
 from abi_json.v2.strategy import strategyAbi
 
-from configs.v2 import config
+from configs.v2.config import dataeth, databsc
 from configs.config_django import mysql_kwargs
 
 
@@ -110,20 +111,18 @@ def toFixed(num, fixed=None):
     return str(round(num, fixed))
 
 
-#  获取配置文件
-def getVaultsConfig():
-    return config.data
-
-
 #  初始化合约
 def initContract(item):
-    # w3 = Web3('https://mainnet.infura.io/v3/30636a84ebb34a1f8d0966c88134ade3')
-    # print('w3.isConnected()', w3, w3.isConnected())
-    tokenContract = w3.eth.contract(abi=erc20Abi, address=item['token'])
-    vaultContract = w3.eth.contract(abi=vaultAbi, address=item['vault'])
+    if item.get('source') == 'bsc':
+        w333 = Web3(HTTPProvider('https://bsc-dataseed2.binance.org'))
+    else:
+        w333 = w3
+    # print('w333.isConnected()', w333, w333.isConnected())
+    tokenContract = w333.eth.contract(abi=erc20Abi, address=item['token'])
+    vaultContract = w333.eth.contract(abi=vaultAbi, address=item['vault'])
     strategyContract = None
     if item.get('Strategy'):
-        strategyContract = w3.eth.contract(abi=strategyAbi, address=item['Strategy'])
+        strategyContract = w333.eth.contract(abi=strategyAbi, address=item['Strategy'])
     return tokenContract, vaultContract, strategyContract
 
 
@@ -188,10 +187,9 @@ def getStrategyAPY(lst):
 
 # 合并机枪池配置至本地配置
 def getVaultsList():
-    config = getVaultsConfig()
-    # print(config)
     commonBack = []
-    for item in config:
+
+    for item in dataeth + databsc:
         init_con = initContract(item)
         print('initContract(config[0])', init_con)
         #  初始化合约
@@ -244,12 +242,6 @@ def getVaultsList():
             'apy': float(pool['yfiiAPY']),
             'staked': pool['volume'],
         })
-    tvl.append({
-        'name': 'yfii',
-        'tvl': 0,
-        'apy': 0,
-        'staked': 0,
-    })
 
     oldPoolData.extend(apyBackData)
 
@@ -264,7 +256,7 @@ def getVaultsList():
     return text_vault, text_3pool
 
 
-# 一池和二池
+# 一池-四池
 def getOldPoolData(yfii_price):
     res = requests.get('https://api.coinmarketcap.com/data-api/v1/farming/yield/latest').json()
     farmingProjects = res['data']['farmingProjects']
@@ -278,44 +270,59 @@ def getOldPoolData(yfii_price):
     oldPoolAllData = farmingProjects[oldPoolIndex]['poolList']
     data_0 = oldPoolAllData[0]
     data_1 = oldPoolAllData[1]
-    oldPoolData = [{
-        'Strategy': "0xb81D3cB2708530ea990a287142b82D058725C092",
-        'assetName': data_0['name'],
-        'balancePrice': toFixed(data_0['totalStake'], 2),
-        'id': data_0['id'],
-        'name': 'yearn.finance',
-        'strategyName': data_0['name'],
-        'token': "0xdF5e0e81Dff6FAF3A7e52BA697820c5e32D806A8",
-        'vault': "0xb81D3cB2708530ea990a287142b82D058725C092",
-        'yfiiWeeklyROI': toFixed(data_0['weeklyROI'], 4),
-        'yfiiAPY': toFixed(data_0['yearlyROI'], 4)
-    },
-    {
-        'Strategy': "0xAFfcD3D45cEF58B1DfA773463824c6F6bB0Dc13a",
-        'assetName': data_1['name'],
-        'balancePrice': toFixed(data_1['totalStake'], 2),
-        'id': data_1['id'],
-        'name': 'Balancer Pool',
-        'strategyName': data_1['name'],
-        'token': "0x16cAC1403377978644e78769Daa49d8f6B6CF565",
-        'vault': "0xAFfcD3D45cEF58B1DfA773463824c6F6bB0Dc13a",
-        'yfiiWeeklyROI': toFixed(data_1['weeklyROI'], 4),
-        'yfiiAPY': toFixed(data_1['yearlyROI'], 4)
-    },
-    {
-        'Strategy': "0xf1750B770485A5d0589A6ba1270D9FC354884D45",
-        'assetName': 'YFII',
-        # 'balancePrice': toFixed(data_1['totalStake'], 2),
-        # 'id': data_1['id'],
-        'name': 'Governance',
-        # 'strategyName': data_1['name'],
-        'token': "0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83",
-        'yfiiWeeklyROI': '0',
-        'yfiiAPY': '0',
-        'yfii_price': yfii_price,
-    }]
 
-    for pool in oldPoolData:
+    data_4 = getDATA()
+
+    oldPoolData = [
+        {
+            'Strategy': "0xb81D3cB2708530ea990a287142b82D058725C092",
+            'assetName': data_0['name'],
+            'balancePrice': toFixed(data_0['totalStake'], 2),
+            'id': data_0['id'],
+            'name': 'yearn.finance',
+            'strategyName': data_0['name'],
+            'token': "0xdF5e0e81Dff6FAF3A7e52BA697820c5e32D806A8",
+            'vault': "0xb81D3cB2708530ea990a287142b82D058725C092",
+            'yfiiWeeklyROI': toFixed(data_0['weeklyROI'], 4),
+            'yfiiAPY': toFixed(data_0['yearlyROI'], 4)
+        },
+        {
+            'Strategy': "0xAFfcD3D45cEF58B1DfA773463824c6F6bB0Dc13a",
+            'assetName': data_1['name'],
+            'balancePrice': toFixed(data_1['totalStake'], 2),
+            'id': data_1['id'],
+            'name': 'Balancer Pool',
+            'strategyName': data_1['name'],
+            'token': "0x16cAC1403377978644e78769Daa49d8f6B6CF565",
+            'vault': "0xAFfcD3D45cEF58B1DfA773463824c6F6bB0Dc13a",
+            'yfiiWeeklyROI': toFixed(data_1['weeklyROI'], 4),
+            'yfiiAPY': toFixed(data_1['yearlyROI'], 4)
+        },
+        {
+            'Strategy': "0xf1750B770485A5d0589A6ba1270D9FC354884D45",
+            'assetName': 'YFII',
+            # 'balancePrice': toFixed(data_1['totalStake'], 2),
+            # 'id': data_1['id'],
+            'name': 'Governance',
+            # 'strategyName': data_1['name'],
+            'token': "0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83",
+            'yfiiWeeklyROI': '0',
+            'yfiiAPY': '0',
+            'yfii_price': yfii_price,
+        },
+        {
+            'Strategy': "0x3d367c9529f260b0661e1c1e91167c9319ee96ca",
+            'assetName': 'yfii Tether USD',
+            'token': "0x72Cf258c852Dc485a853370171d46B9D29fD3184",
+            'name': 'pool4',
+            'yfiiWeeklyROI': toFixed(data_4.get('YFIWeeklyROI', 0), 4),
+            'yfiiAPY': toFixed(data_4.get('apy', 0), 4),
+            'volume': data_4.get('totalStakedAmount', 0),
+            'balancePrice': toFixed(data_4.get('TVL', 0), 2),
+        }
+    ]
+
+    for pool in oldPoolData[0:3]:  # 前三个池子
         getPoolVol(pool)
 
     return oldPoolData
@@ -331,22 +338,6 @@ def getPoolVol(pool):
     pool['volume'] = volume
     if strategy == "0xf1750B770485A5d0589A6ba1270D9FC354884D45":  # pool 3
         pool["balancePrice"] = toFixed(volume * pool['yfii_price'], 2)
-
-
-# # 三个池子的总量
-# def getPoolsVolume(price):
-#     address_lst = [
-#         ('pool1', 'ycrv', '0xdF5e0e81Dff6FAF3A7e52BA697820c5e32D806A8', '0xb81D3cB2708530ea990a287142b82D058725C092'),
-#         ('pool2', 'BPT', '0x16cAC1403377978644e78769Daa49d8f6B6CF565', '0xAFfcD3D45cEF58B1DfA773463824c6F6bB0Dc13a'),
-#         ('pool3', 'yfii', '0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83', '0xf1750B770485A5d0589A6ba1270D9FC354884D45'),
-#     ]
-#
-#     pool_lst = {}
-#     for address in address_lst:
-#         vol = getPoolVol(address[1], address[2], address[3], price)
-#         pool_lst[address[0]] = vol
-#
-#     return pool_lst
 
 
 db = peewee.MySQLDatabase(**mysql_kwargs)
@@ -373,3 +364,6 @@ if __name__ == '__main__':
     )
     item.save()
     db.close()
+    # from web3 import Web3
+    #
+    # print(Web3.toChecksumAddress('0x0316eb71485b0ab14103307bf65a021042c6d380'))
