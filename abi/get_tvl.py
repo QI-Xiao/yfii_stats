@@ -324,9 +324,9 @@ def getOldPoolData(yfii_price, data_4):
             'token': "0x72Cf258c852Dc485a853370171d46B9D29fD3184",
             'name': 'pool4',
             'yfiiWeeklyROI': toFixed(data_4.get('WeeklyROI', 0), 2),
-            'yfiiAPY': toFixed(data_4.get('apy', 0), 2),
-            'volume': data_4.get('totalStakedAmount', 0),
-            'balancePrice': toFixed(data_4.get('TVL', 0), 2),
+            'yfiiAPY': data_4.get('apy', '0').rstrip('%'),
+            'volume': data_4.get('staked', 0),
+            'balancePrice': toFixed(data_4.get('tvl', 0), 2),
             'source': 'eth',
             'sourceUrl': 'https://dfi.money/',
         }
