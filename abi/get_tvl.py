@@ -6,7 +6,7 @@ import requests
 from web3 import Web3, HTTPProvider
 from web3.auto.infura import w3
 
-from pool4 import getDATA
+from poolReward import pool4_and_farm
 from abi_json.ERC20 import erc20Abi
 from abi_json.v2.vault import vaultAbi
 from abi_json.v2.strategy import strategyAbi
@@ -232,14 +232,17 @@ def getVaultsList():
     # print('priceBackData:', priceBackData)
     apyBackData = getStrategyAPY(priceBackData)
     # print('apyBackData:', apyBackData)
-    oldPoolData = getOldPoolData(yfii_price)
+
+    data_4, farm_pools = pool4_and_farm()
+
+    oldPoolData = getOldPoolData(yfii_price, data_4)
 
     tvl = []
     for pool in oldPoolData:
         tvl.append({
             'name': pool['name'],
             'tvl': float(pool['balancePrice']),
-            'apy': float(pool['yfiiAPY']),
+            'apy': pool['yfiiAPY'] + '%',
             'staked': pool['volume'],
         })
 
@@ -253,11 +256,12 @@ def getVaultsList():
 
     text_vault = json.dumps({'data': oldPoolData, 'created_time': str(created_time)})
     text_3pool = json.dumps({'data': tvl, 'created_time': str(created_time)})
-    return text_vault, text_3pool
+    text_farm = json.dumps({'data': farm_pools, 'created_time': str(created_time)})
+    return text_vault, text_3pool, text_farm
 
 
 # 一池-四池
-def getOldPoolData(yfii_price):
+def getOldPoolData(yfii_price, data_4):
     res = requests.get('https://api.coinmarketcap.com/data-api/v1/farming/yield/latest').json()
     farmingProjects = res['data']['farmingProjects']
     for oldPoolIndex, fi in enumerate(farmingProjects):
@@ -271,8 +275,6 @@ def getOldPoolData(yfii_price):
     data_0 = oldPoolAllData[0]
     data_1 = oldPoolAllData[1]
 
-    data_4 = getDATA()
-
     oldPoolData = [
         {
             'Strategy': "0xb81D3cB2708530ea990a287142b82D058725C092",
@@ -283,8 +285,8 @@ def getOldPoolData(yfii_price):
             'strategyName': data_0['name'],
             'token': "0xdF5e0e81Dff6FAF3A7e52BA697820c5e32D806A8",
             'vault': "0xb81D3cB2708530ea990a287142b82D058725C092",
-            'yfiiWeeklyROI': toFixed(data_0['weeklyROI'], 4),
-            'yfiiAPY': toFixed(data_0['yearlyROI'], 4),
+            'yfiiWeeklyROI': toFixed(data_0['weeklyROI'], 2),
+            'yfiiAPY': toFixed(data_0['yearlyROI'], 2),
             'source': 'eth',
             'sourceUrl': 'https://yfii.finance/',
         },
@@ -297,8 +299,8 @@ def getOldPoolData(yfii_price):
             'strategyName': data_1['name'],
             'token': "0x16cAC1403377978644e78769Daa49d8f6B6CF565",
             'vault': "0xAFfcD3D45cEF58B1DfA773463824c6F6bB0Dc13a",
-            'yfiiWeeklyROI': toFixed(data_1['weeklyROI'], 4),
-            'yfiiAPY': toFixed(data_1['yearlyROI'], 4),
+            'yfiiWeeklyROI': toFixed(data_1['weeklyROI'], 2),
+            'yfiiAPY': toFixed(data_1['yearlyROI'], 2),
             'source': 'eth',
             'sourceUrl': 'https://yfii.finance/',
         },
@@ -321,8 +323,8 @@ def getOldPoolData(yfii_price):
             'assetName': 'yfii Tether USD',
             'token': "0x72Cf258c852Dc485a853370171d46B9D29fD3184",
             'name': 'pool4',
-            'yfiiWeeklyROI': toFixed(data_4.get('YFIWeeklyROI', 0), 4),
-            'yfiiAPY': toFixed(data_4.get('apy', 0), 4),
+            'yfiiWeeklyROI': toFixed(data_4.get('WeeklyROI', 0), 2),
+            'yfiiAPY': toFixed(data_4.get('apy', 0), 2),
             'volume': data_4.get('totalStakedAmount', 0),
             'balancePrice': toFixed(data_4.get('TVL', 0), 2),
             'source': 'eth',
@@ -354,6 +356,7 @@ db = peewee.MySQLDatabase(**mysql_kwargs)
 class Abi_tokenjson(peewee.Model):
     text = peewee.TextField(verbose_name='文本')
     text_3pool = peewee.TextField(verbose_name='文本_3pool')
+    text_farm = peewee.TextField(verbose_name='文本_farm')
     created_time = peewee.DateTimeField(verbose_name='创建时间')
 
     class Meta:
@@ -361,13 +364,14 @@ class Abi_tokenjson(peewee.Model):
 
 
 if __name__ == '__main__':
-    text_vault, text_3pool = getVaultsList()
+    text_vault, text_3pool, text_farm = getVaultsList()
 
     db.connect()
 
     item = Abi_tokenjson.create(
         text=text_vault,
         text_3pool=text_3pool,
+        text_farm=text_farm,
         created_time=datetime.datetime.now() + datetime.timedelta(hours=8)
     )
     item.save()

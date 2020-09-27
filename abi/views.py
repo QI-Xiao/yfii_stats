@@ -19,8 +19,9 @@ def stats_api(request):
     # return HttpResponse(last_one.text)
 
 
-def pool3_apy(request):
-    response = JsonResponse({'apy': 0})
+def farm_pools(request):
+    last_one = TokenJson.objects.all().last()
+    response = HttpResponse(last_one.text_farm)
     response["Access-Control-Allow-Origin"] = "*"
     return response
 
