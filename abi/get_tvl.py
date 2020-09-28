@@ -15,43 +15,6 @@ from configs.v2.config import dataeth, databsc
 from configs.config_django import mysql_kwargs
 
 
-# 自定义机枪池配置
-# id 获取法币报价字段名
-# vaults = [
-#   {
-#     'name': 'usdt',
-#     'id': 'tether',
-#   },
-#   {
-#     "name": 'ycrv',
-#     'id': 'curve-fi-ydai-yusdc-yusdt-ytusd',
-#     "curveName": 'y',
-#   },
-#   {
-#     "name": 'dai',
-#     'id': 'dai',
-#   },
-#   {
-#     "name": 'tusd',
-#     'id': 'true-usd',
-#   },
-#   {
-#     "name": 'usdc',
-#     'id': 'usd-coin',
-#   },
-#   {
-#     'name': 'eth',
-#     'id': 'ethereum',
-#   }
-# ]
-
-
-# // 获取名称方法
-def getName(contract):
-    name = contract.functions.getName().call()
-    return name
-
-
 # // 获取池内余额
 def getBalance(contract, tokenInfo):
     decimals = tokenInfo['decimals']
@@ -156,15 +119,9 @@ def getTokenInfo(contract, item=None):
     }
 
 
-#  获取机枪池名称
-def getAssetName(contract):
-    name = contract.functions.name().call()
-    return name
-
-
 #  获取策略名称
 def getStrategyName(contract):
-    name = getName(contract)
+    name = contract.functions.getName().call()
     if name and 'yfii:Strategy:' in name:
         return name.split('yfii:Strategy:')[1]
     return name
@@ -198,7 +155,7 @@ def getVaultsList():
         #  获取币种信息
         tokenInfo = getTokenInfo(tokenContract, item)
         #  获取池子名称
-        assetName = getAssetName(vaultContract) or item.get('assetName', '')
+        assetName = tokenContract.functions.name().call() or item.get('assetName', '')
         print('tokenInfo', tokenInfo, '\nassetName', assetName)
         #  获取池子余额
         balance = getBalance(vaultContract, tokenInfo)
@@ -208,15 +165,6 @@ def getVaultsList():
         strategyBalance = 0
         if item.get('Strategy'):
             strategyName = getStrategyName(strategyContract)
-        # print('strategyName', strategyName)
-
-        # for index, fi in enumerate(vaults):
-        #     if fi['name'] == item['name']:
-        #         break
-        # else:
-        #     index = -1
-        # vaultsData = vaults[index] if index > -1 else {}
-        # print('vaultsData', vaultsData)
 
         oneBack = {
             'assetName': assetName,
@@ -341,7 +289,7 @@ def getOldPoolData(yfii_price, data_4):
         },
         {
             'Strategy': "0x3d367c9529f260b0661e1c1e91167c9319ee96ca",
-            'assetName': 'yfii Tether USD',
+            'assetName': data_4.get('assetName', 'yfii Tether USD'),
             'token': "0x72Cf258c852Dc485a853370171d46B9D29fD3184",
             'name': 'pool4',
             'yfiiWeeklyROI': toFixed(data_4.get('WeeklyROI', 0), 2),

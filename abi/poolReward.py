@@ -134,7 +134,11 @@ def get_data(pool, rewardTokenAddress, reward_price, lp_price):
         WeeklyROI = 0
     apy = WeeklyROI * 52
     apy = f"{round(apy, 2)}%"
-    return {"apy": apy, "staked": stake_lp, "tvl": tvl, 'WeeklyROI': WeeklyROI, 'price': lp_price}
+    return {
+        "apy": apy, "staked": stake_lp, "tvl": tvl,
+        'WeeklyROI': WeeklyROI, 'price': lp_price,
+        'assetName': reward_instance.functions.name().call()
+    }
 
 
 config = [
@@ -172,7 +176,6 @@ def pool4_and_farm():
         if index == 0:
             pool4 = data
         else:
-            del data['WeeklyROI']
             farm_pools.append(data)
     return pool4, farm_pools
 
