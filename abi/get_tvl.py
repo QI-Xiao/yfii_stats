@@ -248,15 +248,36 @@ def getVaultsList():
 
     oldPoolData.extend(apyBackData)
 
+    yfii_mefi = farm_pools[0]
+    oldPoolData.append(
+        {
+            "yfiiAPY": yfii_mefi['apy'].rstrip('%'),
+            "price": {
+                "usd": yfii_mefi['price']
+            },
+            "balancePrice": toFixed(yfii_mefi['tvl'], 2),
+            "assetName": "MEET.ONE Finance",
+            "strategyName": "",
+            "balance": toFixed(yfii_mefi['staked'], 0),
+            "token": "0x1a969239e12f07281f8876d11afcee081d872adf",
+            "Strategy": "0x6A77c0c917Da188fBfa9C380f2E60dd223c0c35a",
+            "vault": "",
+            "name": "yfii-mefi",
+            "StrategyName": "",
+            "source": "eth",
+            "sourceUrl": "https://dfi.money/"
+        }
+    )
+
     print(172, oldPoolData)
 
-    created_time = datetime.datetime.now() + datetime.timedelta(hours=8)
+    created_time_str = str(datetime.datetime.now() + datetime.timedelta(hours=8))
     # with open('test_data.json', 'w') as f:
     #     f.write(json.dumps(oldPoolData))
 
-    text_vault = json.dumps({'data': oldPoolData, 'created_time': str(created_time)})
-    text_3pool = json.dumps({'data': tvl, 'created_time': str(created_time)})
-    text_farm = json.dumps({'data': farm_pools, 'created_time': str(created_time)})
+    text_vault = json.dumps({'data': oldPoolData, 'created_time': created_time_str})
+    text_3pool = json.dumps({'data': tvl, 'created_time': created_time_str})
+    text_farm = json.dumps({'data': farm_pools, 'created_time': created_time_str})
     return text_vault, text_3pool, text_farm
 
 

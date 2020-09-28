@@ -114,6 +114,7 @@ def get_data(pool, rewardTokenAddress, reward_price, lp_price):
     reward_instance = w3.eth.contract(
         abi=erc20ABI, address=w3.toChecksumAddress(rewardTokenAddress)
     )
+    # print(reward_instance.functions.name().call())
     reward_decimals = reward_instance.functions.decimals().call()
 
     stake_lp = lp_instance.functions.balanceOf(pool).call() / 10 ** lp_decimals
@@ -133,7 +134,7 @@ def get_data(pool, rewardTokenAddress, reward_price, lp_price):
         WeeklyROI = 0
     apy = WeeklyROI * 52
     apy = f"{round(apy, 2)}%"
-    return {"apy": apy, "staked": stake_lp, "tvl": tvl, 'WeeklyROI': WeeklyROI}
+    return {"apy": apy, "staked": stake_lp, "tvl": tvl, 'WeeklyROI': WeeklyROI, 'price': lp_price}
 
 
 config = [
