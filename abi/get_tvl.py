@@ -204,7 +204,7 @@ def getVaultsList():
                 "usd": yfii_mefi['price']
             },
             "balancePrice": toFixed(yfii_mefi['tvl'], 2),
-            "assetName": "MEET.ONE Finance",
+            "assetName": yfii_mefi.get("assetName", "MEET.ONE Finance"),
             "strategyName": "",
             "balance": toFixed(yfii_mefi['staked'], 0),
             "token": "0x1a969239e12f07281f8876d11afcee081d872adf",
@@ -247,7 +247,7 @@ def getOldPoolData(yfii_price, data_4):
     oldPoolData = [
         {
             'Strategy': "0xb81D3cB2708530ea990a287142b82D058725C092",
-            'assetName': data_0['name'],
+            'assetName': "Curve.fi yDAI/yUSDC/yUSDT/yTUSD", # w3.eth.contract(abi=erc20Abi, address="0xdF5e0e81Dff6FAF3A7e52BA697820c5e32D806A8").functions.name().call(),
             'balancePrice': toFixed(data_0['totalStake'], 2),
             'id': data_0['id'],
             'name': 'yearn.finance',
@@ -261,7 +261,7 @@ def getOldPoolData(yfii_price, data_4):
         },
         {
             'Strategy': "0xAFfcD3D45cEF58B1DfA773463824c6F6bB0Dc13a",
-            'assetName': data_1['name'],
+            'assetName': "Balancer Pool Token",  #w3.eth.contract(abi=erc20Abi, address="0x16cAC1403377978644e78769Daa49d8f6B6CF565").functions.name().call(),
             'balancePrice': toFixed(data_1['totalStake'], 2),
             'id': data_1['id'],
             'name': 'Balancer Pool',
@@ -275,7 +275,7 @@ def getOldPoolData(yfii_price, data_4):
         },
         {
             'Strategy': "0xf1750B770485A5d0589A6ba1270D9FC354884D45",
-            'assetName': 'YFII',
+            'assetName': "YFII.finance", #w3.eth.contract(abi=erc20Abi, address="0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83").functions.name().call(),
             # 'balancePrice': toFixed(data_1['totalStake'], 2),
             # 'id': data_1['id'],
             'name': 'Governance',
