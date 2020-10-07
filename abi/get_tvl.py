@@ -181,9 +181,9 @@ def getVaultsList():
     apyBackData = getStrategyAPY(priceBackData)
     # print('apyBackData:', apyBackData)
 
-    data_4, farm_pools = pool4_and_farm()
+    data_4, farm_pools, data_2 = pool4_and_farm()
 
-    oldPoolData = getOldPoolData(yfii_price, data_4)
+    oldPoolData = getOldPoolData(yfii_price, data_4, data_2)
 
     tvl = []
     for pool in oldPoolData:
@@ -230,7 +230,7 @@ def getVaultsList():
 
 
 # 一池-四池
-def getOldPoolData(yfii_price, data_4):
+def getOldPoolData(yfii_price, data_4, data_2):
     res = requests.get('https://api.coinmarketcap.com/data-api/v1/farming/yield/latest').json()
     farmingProjects = res['data']['farmingProjects']
     for oldPoolIndex, fi in enumerate(farmingProjects):
@@ -242,7 +242,7 @@ def getOldPoolData(yfii_price, data_4):
     # print('oldPoolIndex', oldPoolIndex)
     oldPoolAllData = farmingProjects[oldPoolIndex]['poolList']
     data_0 = oldPoolAllData[0]
-    data_1 = oldPoolAllData[1]
+    # data_1 = oldPoolAllData[1]
 
     oldPoolData = [
         {
@@ -262,16 +262,17 @@ def getOldPoolData(yfii_price, data_4):
         {
             'Strategy': "0xAFfcD3D45cEF58B1DfA773463824c6F6bB0Dc13a",
             'assetName': "Balancer Pool Token",  #w3.eth.contract(abi=erc20Abi, address="0x16cAC1403377978644e78769Daa49d8f6B6CF565").functions.name().call(),
-            'balancePrice': toFixed(data_1['totalStake'], 2),
-            'id': data_1['id'],
+            'balancePrice': toFixed(data_2['tvl'], 2),
+            # 'id': data_1['id'],
             'name': 'Balancer Pool',
-            'strategyName': data_1['name'],
+            'strategyName': "Balancer YFII-DAI",
             'token': "0x16cAC1403377978644e78769Daa49d8f6B6CF565",
             'vault': "0xAFfcD3D45cEF58B1DfA773463824c6F6bB0Dc13a",
-            'yfiiWeeklyROI': toFixed(data_1['weeklyROI'], 2),
-            'yfiiAPY': toFixed(data_1['yearlyROI'], 2),
+            'yfiiWeeklyROI': toFixed(data_2['WeeklyROI'], 2),
+            'yfiiAPY': data_2['apy'].rstrip('%'),
             'source': 'eth',
             'sourceUrl': 'https://yfii.finance/',
+            'volume': data_2['staked']
         },
         {
             'Strategy': "0xf1750B770485A5d0589A6ba1270D9FC354884D45",
@@ -310,6 +311,8 @@ def getOldPoolData(yfii_price, data_4):
 # 单个池子的抵押量和tvl
 def getPoolVol(pool):
     strategy = pool['Strategy']
+    if strategy == '0xAFfcD3D45cEF58B1DfA773463824c6F6bB0Dc13a':
+        return
     decimals = 10 ** 18
     contract = w3.eth.contract(abi=erc20Abi, address=pool['token'])
     balance = contract.functions.balanceOf(strategy).call()
