@@ -181,7 +181,7 @@ def getVaultsList():
     apyBackData = getStrategyAPY(priceBackData)
     # print('apyBackData:', apyBackData)
 
-    data_4, farm_pools, data_2 = pool4_and_farm()
+    data_4, data_farm_pools, data_2, data_lp_pools = pool4_and_farm()
 
     oldPoolData = getOldPoolData(yfii_price, data_4, data_2)
 
@@ -196,7 +196,7 @@ def getVaultsList():
 
     oldPoolData.extend(apyBackData)
 
-    yfii_mefi = farm_pools[0]
+    yfii_mefi = data_farm_pools[0]
     oldPoolData.append(
         {
             "yfiiAPY": yfii_mefi['apy'].rstrip('%'),
@@ -225,8 +225,9 @@ def getVaultsList():
 
     text_vault = json.dumps({'data': oldPoolData, 'created_time': created_time_str})
     text_3pool = json.dumps({'data': tvl, 'created_time': created_time_str})
-    text_farm = json.dumps({'data': farm_pools, 'created_time': created_time_str})
-    return text_vault, text_3pool, text_farm
+    text_farm = json.dumps({'data': data_farm_pools, 'created_time': created_time_str})
+    text_lp = json.dumps({'data': data_lp_pools, 'created_time': created_time_str})
+    return text_vault, text_3pool, text_farm, text_lp
 
 
 # 一池-四池
@@ -329,6 +330,7 @@ class Abi_tokenjson(peewee.Model):
     text = peewee.TextField(verbose_name='文本')
     text_3pool = peewee.TextField(verbose_name='文本_3pool')
     text_farm = peewee.TextField(verbose_name='文本_farm')
+    text_lp = peewee.TextField(verbose_name='文本_lp')
     created_time = peewee.DateTimeField(verbose_name='创建时间')
 
     class Meta:
@@ -336,7 +338,7 @@ class Abi_tokenjson(peewee.Model):
 
 
 if __name__ == '__main__':
-    text_vault, text_3pool, text_farm = getVaultsList()
+    text_vault, text_3pool, text_farm, text_lp = getVaultsList()
 
     db.connect()
 
@@ -344,6 +346,7 @@ if __name__ == '__main__':
         text=text_vault,
         text_3pool=text_3pool,
         text_farm=text_farm,
+        text_lp=text_lp,
         created_time=datetime.datetime.now() + datetime.timedelta(hours=8)
     )
     item.save()

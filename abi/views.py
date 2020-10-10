@@ -32,3 +32,11 @@ def stake_pools(request):
     response = HttpResponse(last_one.text_3pool)
     response["Access-Control-Allow-Origin"] = "*"
     return response
+
+
+def lp_pools(request):
+    last_one = TokenJson.objects.all().last()
+
+    response = HttpResponse(last_one.text_lp)
+    response["Access-Control-Allow-Origin"] = "*"
+    return response

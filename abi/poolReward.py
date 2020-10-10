@@ -11,9 +11,11 @@ YFII = "0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83"
 DAI = "0x6B175474E89094C44Da98b954EedeAC495271d0F"
 MEFI = "0x1a969239E12F07281f8876D11AfceE081D872adf"
 iUSDT = "0x72Cf258c852Dc485a853370171d46B9D29fD3184"
+UNI = "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984"
 
 yfii2dai = [YFII, WETH, DAI]
 mefi2dai = [MEFI, WETH, DAI]
+uni2dai = [UNI, WETH, DAI]
 
 with open("./abi_json/erc20.json") as f:
     erc20ABI = json.loads(f.read())
@@ -134,7 +136,7 @@ def getprice(token2dai, token_decimals):
 #     return {"apy": apy, "totalStakedAmount": totalStakedAmount, "TVL": TVL}
 
 
-def get_data(pool, rewardTokenAddress, reward_price, lp_price, lp_token=False):
+def get_data(pool, rewardTokenAddress, reward_price, lp_price, lp_token=False, all_info=True):
     pool_instance = w3.eth.contract(abi=poolABI, address=w3.toChecksumAddress(pool))
     if not lp_token:
         lp = pool_instance.functions.lp().call()  # 存的代币
@@ -174,17 +176,19 @@ def get_data(pool, rewardTokenAddress, reward_price, lp_price, lp_token=False):
         "apy": apy, "staked": stake_lp, "tvl": tvl,
         'WeeklyROI': WeeklyROI, 'price': lp_price,
         'assetName': reward_instance.functions.name().call()
+    } if all_info else {
+        "apy": apy, "staked": stake_lp, "tvl": tvl,
     }
 
 
-config = [
-    {
+config_pool4 = {
         "name": "pool4",
         "pool": "0x3d367C9529f260B0661e1C1E91167C9319ee96cA",
         "rewardTokenAddress": "0x72Cf258c852Dc485a853370171d46B9D29fD3184",
         "reward_price": "getiTokenPrice('0x72Cf258c852Dc485a853370171d46B9D29fD3184')",
         "lp_price": "getprice(yfii2dai, 18)",
-    },
+}
+config_farms = [
     {
         "name": "yfii-mefi",
         "pool": "0x6A77c0c917Da188fBfa9C380f2E60dd223c0c35a",
@@ -199,34 +203,70 @@ config = [
         "reward_price": "getprice(mefi2dai, 8)",
         "lp_price": "getUniswapLPPrice('0xc4b478e749dbcfddf96c6f84f4133e2f03c345a9')",
     },
-    {
+]
+config_pool2 = {
         "name": "bal-yfii",
         "pool": "0xAFfcD3D45cEF58B1DfA773463824c6F6bB0Dc13a",
         "rewardTokenAddress": "0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83",
         "reward_price": "getprice(yfii2dai, 18)",
         "lp_price": "getBalLPPrice('0x16cAC1403377978644e78769Daa49d8f6B6CF565')",
         "lp_token": "0x16cAC1403377978644e78769Daa49d8f6B6CF565",
-    }
+}
+config_lp = [
+    {
+        "name": "eth-usdt",
+        "pool": "0x6C3e4cb2E96B01F4b866965A91ed4437839A121a",
+        "rewardTokenAddress": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+        "reward_price": "getprice(uni2dai, 18)",
+        "lp_price": "getUniswapLPPrice('0x0d4a11d5EEaaC28EC3F61d100daF4d40471f1852')",
+        "lp_token": "0x0d4a11d5EEaaC28EC3F61d100daF4d40471f1852",
+    },
+    {
+        "name": "eth-usdc",
+        "pool": "0x7FBa4B8Dc5E7616e59622806932DBea72537A56b",
+        "rewardTokenAddress": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+        "reward_price": "getprice(uni2dai, 18)",
+        "lp_price": "getUniswapLPPrice('0xB4e16d0168e52d35CaCD2c6185b44281Ec28C9Dc')",
+        "lp_token": "0xB4e16d0168e52d35CaCD2c6185b44281Ec28C9Dc",
+    },
+    {
+        "name": "eth-dai",
+        "pool": "0xa1484C3aa22a66C62b77E0AE78E15258bd0cB711",
+        "rewardTokenAddress": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+        "reward_price": "getprice(uni2dai, 18)",
+        "lp_price": "getUniswapLPPrice('0xA478c2975Ab1Ea89e8196811F51A7B7Ade33eB11')",
+        "lp_token": "0xA478c2975Ab1Ea89e8196811F51A7B7Ade33eB11",
+    },
+    {
+        "name": "eth-wbtc",
+        "pool": "0xCA35e32e7926b96A9988f61d510E038108d8068e",
+        "rewardTokenAddress": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+        "reward_price": "getprice(uni2dai, 18)",
+        "lp_price": "getUniswapLPPrice('0xBb2b8038a1640196FbE3e38816F3e67Cba72D940')",
+        "lp_token": "0xBb2b8038a1640196FbE3e38816F3e67Cba72D940",
+    },
 ]
 
 
+def get_pool_data(i, all_info=True):
+    reward_price = eval(i["reward_price"])
+    lp_price = eval(i["lp_price"])
+    lp_token = i.get("lp_token", False)
+    data = get_data(
+        i["pool"], i["rewardTokenAddress"], reward_price, lp_price, lp_token, all_info
+    )
+    data["name"] = i["name"]
+    return data
+
+
 def pool4_and_farm():
-    farm_pools = []
-    for index, i in enumerate(config):
-        reward_price = eval(i["reward_price"])
-        lp_price = eval(i["lp_price"])
-        lp_token = i.get("lp_token", False)
-        data = get_data(
-            i["pool"], i["rewardTokenAddress"], reward_price, lp_price, lp_token
-        )
-        data["name"] = i["name"]
-        if index == 0:
-            pool4 = data
-        elif index == 3:
-            pool2 = data
-        else:
-            farm_pools.append(data)
-    return pool4, farm_pools, pool2
+
+    pool4 = get_pool_data(config_pool4)
+    pools_farm = [get_pool_data(i) for i in config_farms]
+    pool2 = get_pool_data(config_pool2)
+    pools_lp = [get_pool_data(i, all_info=False) for i in config_lp]
+
+    return pool4, pools_farm, pool2, pools_lp
 
 if __name__ == "__main__":
     # for i in config:
