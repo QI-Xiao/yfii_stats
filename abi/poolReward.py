@@ -177,7 +177,7 @@ def get_data(pool, rewardTokenAddress, reward_price, lp_price, lp_token=False, a
         'WeeklyROI': WeeklyROI, 'price': lp_price,
         'assetName': reward_instance.functions.name().call()
     } if all_info else {
-        "apy": apy, "staked": stake_lp, "tvl": tvl,
+        "apy": apy,
     }
 
 
