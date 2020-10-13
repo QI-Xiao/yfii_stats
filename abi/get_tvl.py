@@ -181,18 +181,25 @@ def getVaultsList():
     apyBackData = getStrategyAPY(priceBackData)
     # print('apyBackData:', apyBackData)
 
-    data_4, data_farm_pools, data_2, data_lp_pools = pool4_and_farm()
+    data_4, data_farm_pools, data_2, data_lp_pools, pool5 = pool4_and_farm()
 
     oldPoolData = getOldPoolData(yfii_price, data_4, data_2)
 
-    tvl = []
+    data_stake_pools = []
     for pool in oldPoolData:
-        tvl.append({
+        data_stake_pools.append({
             'name': pool['name'],
             'tvl': float(pool['balancePrice']),
             'apy': pool['yfiiAPY'] + '%',
             'staked': pool['volume'],
         })
+
+    data_stake_pools.append({
+        'name': pool5['name'],
+        'tvl': pool5['tvl'],
+        'apy': pool5['apy'],
+        'staked': pool5['staked'],
+    })
 
     oldPoolData.extend(apyBackData)
 
@@ -224,10 +231,10 @@ def getVaultsList():
     #     f.write(json.dumps(oldPoolData))
 
     text_vault = json.dumps({'data': oldPoolData, 'created_time': created_time_str})
-    text_3pool = json.dumps({'data': tvl, 'created_time': created_time_str})
+    text_stake = json.dumps({'data': data_stake_pools, 'created_time': created_time_str})
     text_farm = json.dumps({'data': data_farm_pools, 'created_time': created_time_str})
     text_lp = json.dumps({'data': data_lp_pools, 'created_time': created_time_str})
-    return text_vault, text_3pool, text_farm, text_lp
+    return text_vault, text_stake, text_farm, text_lp
 
 
 # 一池-四池

@@ -2,7 +2,7 @@ from web3 import Web3, HTTPProvider
 import json
 import time
 
-w3url = "https://mainnet.infura.io/v3/998f64f3627548bbaf2630599c1eefca"
+w3url = "https://eth-mainnet.alchemyapi.io/v2/4bdDVB5QAaorY2UE-GBUbM2yQB3QJqzv"
 
 w3 = Web3(HTTPProvider(w3url))
 
@@ -188,6 +188,13 @@ config_pool4 = {
         "reward_price": "getiTokenPrice('0x72Cf258c852Dc485a853370171d46B9D29fD3184')",
         "lp_price": "getprice(yfii2dai, 18)",
 }
+config_pool5 = {
+    "name": "pool5",
+    "pool": "0xB6C7Bf515828c1eBf0D5F34930Cda0741eD9263F",
+    "rewardTokenAddress": "0xa1d0e215a23d7030842fc67ce582a6afa3ccab83",
+    "reward_price": "getprice(yfii2dai, 18)",
+    "lp_price": "getprice(yfii2dai, 18)",
+}
 config_farms = [
     {
         "name": "yfii-mefi",
@@ -265,8 +272,9 @@ def pool4_and_farm():
     pools_farm = [get_pool_data(i) for i in config_farms]
     pool2 = get_pool_data(config_pool2)
     pools_lp = [get_pool_data(i, all_info=False) for i in config_lp]
+    pool5 = get_pool_data(config_pool5)
 
-    return pool4, pools_farm, pool2, pools_lp
+    return pool4, pools_farm, pool2, pools_lp, pool5
 
 if __name__ == "__main__":
     # for i in config:
