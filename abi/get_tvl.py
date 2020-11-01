@@ -51,7 +51,7 @@ def fetchTokenPrice(data):
         usd = 0
         balancePrice = '0'
         try:
-            usd = res_json[id_coin]['usd'] or 0
+            usd = (res_json[id_coin]['usd'] if name != 'husd3crv' else res_json['curve-fi-ydai-yusdc-yusdt-ytusd']['usd']) or 0
             balancePrice = toFixed(float(balance) * usd, 2)
         except Exception as e:
             print(192, e)
@@ -133,6 +133,8 @@ def getStrategyAPY(lst):
     apyBackList = []
     for item in lst:
         name = item['name']
+        if name == 'husd3crv':
+            name = 'husd'
         yfiiAPY = res[name]
         one_dic = {
             'yfiiAPY': yfiiAPY.rstrip('%')
@@ -181,7 +183,7 @@ def getVaultsList():
     apyBackData = getStrategyAPY(priceBackData)
     # print('apyBackData:', apyBackData)
 
-    data_4, data_farm_pools, data_2, data_lp_pools, pool5 = pool4_and_farm()
+    data_4, data_farm_pools, data_2, data_lp_origin, pool5 = pool4_and_farm()
 
     oldPoolData = getOldPoolData(yfii_price, data_4, data_2)
 
@@ -223,6 +225,9 @@ def getVaultsList():
             "sourceUrl": "https://dfi.money/"
         }
     )
+
+    data_lp_pools = [{'name': i['name'], 'apy': i["yfiiAPY"]+'%'} for i in data_lp_origin]
+    oldPoolData.extend(data_lp_origin)
 
     print(172, oldPoolData)
 

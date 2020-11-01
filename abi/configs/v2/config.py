@@ -79,7 +79,16 @@ dataeth = [
         "StrategyName": "for",
         'source': 'eth',
         'sourceUrl': 'https://dfi.money/',
-    }
+    },
+    {
+        "token": "0x5B5CFE992AdAC0C9D48E05854B2d91C73a003858",
+        "Strategy": "0x99CE9eEF12c68c4B3568AC161024d1Ac49d52A11",
+        "vault": "0xED434A25612B8d64E3257Fff5f96B33031729fDF",
+        "name": "husd3crv",
+        "StrategyName": "crv",
+        'source': 'eth',
+        'sourceUrl': 'https://dfi.money/',
+    },
 ]
 
 databsc = [

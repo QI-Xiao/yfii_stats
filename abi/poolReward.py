@@ -135,8 +135,11 @@ def getprice(token2dai, token_decimals):
 #     apy = YFIWeeklyROI * 52
 #     return {"apy": apy, "totalStakedAmount": totalStakedAmount, "TVL": TVL}
 
+def toFixed(num, fixed=None):
+    return str(round(num, fixed))
 
-def get_data(pool, rewardTokenAddress, reward_price, lp_price, lp_token=False, all_info=True):
+
+def get_data(pool, rewardTokenAddress, reward_price, lp_price, name, lp_token=False, lp_vault=False):
     pool_instance = w3.eth.contract(abi=poolABI, address=w3.toChecksumAddress(pool))
     if not lp_token:
         lp = pool_instance.functions.lp().call()  # 存的代币
@@ -172,13 +175,45 @@ def get_data(pool, rewardTokenAddress, reward_price, lp_price, lp_token=False, a
     else:
         apy = WeeklyROI * 52
         apy = f"{round(apy, 2)}%"
+
+    if lp_vault:
+        tvl, stake_lp, lpprice = getlpTVL(lp_vault)
+        print('tvl, stake_lp, lpprice', tvl, stake_lp, lpprice)
+
     return {
         "apy": apy, "staked": stake_lp, "tvl": tvl,
         'WeeklyROI': WeeklyROI, 'price': lp_price,
-        'assetName': reward_instance.functions.name().call()
-    } if all_info else {
-        "apy": apy,
+        'assetName': reward_instance.functions.name().call(),
+        "name": name,
+    } if not lp_vault else {
+        "yfiiAPY": apy.rstrip('%'),
+        "balance": toFixed(stake_lp, 0),
+        "balancePrice": toFixed(tvl, 2),
+        'assetName': name,
+        "sourceUrl": "https://dfi.money/",
+        "source": "uni",
+        "token": lp,
+        "name": name,
     }
+
+def getlpTVL(lp_vault):
+    vault_address = lp_vault
+    vault_instance = w3.eth.contract(
+        abi=vaultABI, address=w3.toChecksumAddress(vault_address)
+    )
+    pricePerFullShare = (
+        vault_instance.functions.getPricePerFullShare().call() / 1e18
+    )
+    balance = vault_instance.functions.balance().call()
+
+    # lp token price
+    token = vault_instance.functions.token().call()
+    lpprice = getUniswapLPPrice(token)
+
+    staked = balance * pricePerFullShare / 1e18
+
+    tvl = staked * lpprice
+    return tvl, staked, lpprice
 
 
 config_pool4 = {
@@ -227,6 +262,8 @@ config_lp = [
         "reward_price": "getprice(uni2dai, 18)",
         "lp_price": "getUniswapLPPrice('0x0d4a11d5EEaaC28EC3F61d100daF4d40471f1852')",
         "lp_token": "0x0d4a11d5EEaaC28EC3F61d100daF4d40471f1852",
+        "Strategy": "0x9466AAC3e97F1E716d97c8331ba346Bb243c13bD",
+        "vault": "0x7E43210a4c6831D421f57026617Fdfc8ED3A0baf",
     },
     {
         "name": "eth-usdc",
@@ -235,6 +272,8 @@ config_lp = [
         "reward_price": "getprice(uni2dai, 18)",
         "lp_price": "getUniswapLPPrice('0xB4e16d0168e52d35CaCD2c6185b44281Ec28C9Dc')",
         "lp_token": "0xB4e16d0168e52d35CaCD2c6185b44281Ec28C9Dc",
+        "Strategy": "0x1DE7D7AE631Dc4FFac3af9Cb4a9633820ba85Cd8",
+        "vault": "0x68A23248000d5d4C943EE685989998c1B19bD74E",
     },
     {
         "name": "eth-dai",
@@ -243,6 +282,8 @@ config_lp = [
         "reward_price": "getprice(uni2dai, 18)",
         "lp_price": "getUniswapLPPrice('0xA478c2975Ab1Ea89e8196811F51A7B7Ade33eB11')",
         "lp_token": "0xA478c2975Ab1Ea89e8196811F51A7B7Ade33eB11",
+        "Strategy": "0x41cCed5B81634EcFbd9eCA039aF5dfD05e713B2c",
+        "vault": "0x19d994471D61d36FE367928Cc58102a376089D1f",
     },
     {
         "name": "eth-wbtc",
@@ -251,18 +292,19 @@ config_lp = [
         "reward_price": "getprice(uni2dai, 18)",
         "lp_price": "getUniswapLPPrice('0xBb2b8038a1640196FbE3e38816F3e67Cba72D940')",
         "lp_token": "0xBb2b8038a1640196FbE3e38816F3e67Cba72D940",
+        "Strategy": "0xd24e08bdfefd68138F975035874F38554389A2E6",
+        "vault": "0xb918368082655fA223c162266ecd88Aa7Ae40bc9",
     },
 ]
 
 
-def get_pool_data(i, all_info=True):
+def get_pool_data(i, lp_vault=False):
     reward_price = eval(i["reward_price"])
     lp_price = eval(i["lp_price"])
     lp_token = i.get("lp_token", False)
     data = get_data(
-        i["pool"], i["rewardTokenAddress"], reward_price, lp_price, lp_token, all_info
+        i["pool"], i["rewardTokenAddress"], reward_price, lp_price, i["name"], lp_token, lp_vault
     )
-    data["name"] = i["name"]
     return data
 
 
@@ -271,17 +313,13 @@ def pool4_and_farm():
     pool4 = get_pool_data(config_pool4)
     pools_farm = [get_pool_data(i) for i in config_farms]
     pool2 = get_pool_data(config_pool2)
-    pools_lp = [get_pool_data(i, all_info=False) for i in config_lp]
+    pools_lp = [get_pool_data(i, lp_vault=i["vault"]) for i in config_lp]
+    # print(pools_lp)
     pool5 = get_pool_data(config_pool5)
 
     return pool4, pools_farm, pool2, pools_lp, pool5
 
 if __name__ == "__main__":
-    # for i in config:
-    #     reward_price = eval(i["reward_price"])
-    #     lp_price = eval(i["lp_price"])
-    #     data = get_data(i["pool"], i["rewardTokenAddress"], reward_price, lp_price)
-    #     data["name"] = i["name"]
-    #     print(data)
+    # pool4_and_farm()
     for i in pool4_and_farm():
         print(i)
