@@ -2,7 +2,8 @@ from web3 import Web3, HTTPProvider
 import json
 import time
 
-w3url = "https://eth-mainnet.alchemyapi.io/v2/4bdDVB5QAaorY2UE-GBUbM2yQB3QJqzv"
+# w3url = "https://eth-mainnet.alchemyapi.io/v2/4bdDVB5QAaorY2UE-GBUbM2yQB3QJqzv"
+w3url = "https://eth-mainnet.alchemyapi.io/v2/Z8iv8GVAXh4N2E4udREBpMrbMb0X4e4Z"
 
 w3 = Web3(HTTPProvider(w3url))
 
